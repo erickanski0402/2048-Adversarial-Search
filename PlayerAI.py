@@ -25,7 +25,7 @@ class PlayerAI(BaseAI):
 
     def getMove(self, gridCopy):
         dir = self.decision(gridCopy)
-        
+
         moves = sorted(gridCopy.getAvailableMoves(), key = lambda x: random())
         return moves[randint(0, len(moves ) - 1)] if moves else None
 
@@ -74,10 +74,12 @@ class PlayerAI(BaseAI):
 
     def eval(state):
         # Ideas for utility function:
-        #   -number of merges for a given direction
+        #   1. Number of merges for a given direction
         #       i.e.: moving right results in 2 merges, whereas moving up results in 3 merges
-        #   -Number of open spaces after moving a direction:
+        #   2. Number of open spaces after moving a direction:
         #       i.e.: moving up results in 5 open spaces, whereas moving up results in only 2 open spaces
-        #  - Increase in score based on merges
+        #   3. Increase in score based on merges
         #       i.e.: merging 2 and 2 adds 4 to the score, 4 and 4 yields 8, etc.
+        #   4. Score based on all tiles on the board
+        #   5. Combination of 2 and 4
         return 0
