@@ -18,10 +18,10 @@ actionDic = {
 (PLAYER_TURN, COMPUTER_TURN) = (0, 1)
 
 # Time Limit Before Losing
-
-
-timeLimit = 1000000
-# timeLimit = 0.2
+###############################################################################
+# timeLimit = 1000000
+timeLimit = 0.2
+###############################################################################
 
 
 allowance = 0.05
@@ -50,10 +50,10 @@ class GameManager:
         if currTime - self.prevTime > timeLimit + allowance:
             self.over = True
         else:
-            while time.clock() - self.prevTime < timeLimit + allowance:
+            while time.perf_counter() - self.prevTime < timeLimit + allowance:
                 pass
 
-            self.prevTime = time.clock()
+            self.prevTime = time.perf_counter()
 
     def start(self):
         for i in range(self.initTiles):
@@ -65,7 +65,7 @@ class GameManager:
         turn = PLAYER_TURN
         maxTile = 0
 
-        self.prevTime = time.clock()
+        self.prevTime = time.perf_counter()
 
         while not self.isGameOver() and not self.over:
             # Copy to Ensure AI Cannot Change the Real Grid to Cheat
@@ -106,7 +106,7 @@ class GameManager:
                 self.displayer.display(self.grid)
 
             # Exceeding the Time Allotted for Any Turn Terminates the Game
-            self.updateAlarm(time.clock())
+            # self.updateAlarm(time.perf_counter())
 
             turn = 1 - turn
         print(maxTile)
