@@ -43,7 +43,7 @@ class PlayerAI(BaseAI):
         else:
             return self.getDirectionFromParent(node.parent)
 
-    def minimize(self, state):
+    def minimize(self, state, alpha, beta):
         # print('MINIMIZE STATE', state.dirFromParent)
         if self.terminalTest(state):
             return (None, self.eval(state))
@@ -51,11 +51,17 @@ class PlayerAI(BaseAI):
         (minChild, minUtility) = (None, inf)
 
         for child in state.resolveChildren(False):
-            (_, utility) = self.maximize(child)
+            (_, utility) = self.maximize(child, alpha, beta)
 
             if utility < minUtility:
                 (minChild, minUtility) = (child, utility)
             pass
+
+            if minUtility <= alpha:
+                break
+
+            if minUtility <= beta:
+                beta = minUtility
         # cells = all possible next grids that:
         #   - Don't increase utility
         #
@@ -68,7 +74,7 @@ class PlayerAI(BaseAI):
         # print('MIN CHILD ', minChild)
         return (minChild, minUtility)
 
-    def maximize(self, state):
+    def maximize(self, state, alpha, beta):
         # print('MAXIMIZE STATE', state.dirFromParent)
         if self.terminalTest(state):
             return (None, self.eval(state))
@@ -76,10 +82,16 @@ class PlayerAI(BaseAI):
         (maxChild, maxUtility) = (None, -inf)
 
         for child in state.resolveChildren(True):
-            (_, utility) = self.minimize(child)
+            (_, utility) = self.minimize(child, alpha, beta)
 
             if self.eval(child) > maxUtility:
                 (maxChild, maxUtility) = (child, utility)
+
+            if utility >= beta:
+                break
+
+            if utility > alpha:
+                alpha = maxUtility
 
         # moves = calculate grids possible given all legal moves
         # for <move> (grid object) in <all legal moves> (list of grid objects):
@@ -93,7 +105,7 @@ class PlayerAI(BaseAI):
 
     def decision(self, root):
         # print('ROOT', root)
-        (child, _) = self.maximize(root)
+        (child, _) = self.maximize(root, -inf, inf)
         # print('CHILD', child)
         return child
 
@@ -160,12 +172,8 @@ class PlayerAI(BaseAI):
     def calculateRawScore(self, state):
         # Calculates the raw score of the given state
         #   Based on tiles
-        score = 0
-        for row in state.map:
-            for i in range(len(row)):
-                # if row[i] is not 2:
-                score += row[i]
-        return score
+        return sum(map(sum, state.map))
+        # return sum([sum(row) for row in state.map])
 
     def calculateCellScore(self, state):
         return len(state.getAvailableCells()) * sqrt(state.getMaxTile())
@@ -201,34 +209,3 @@ class PlayerAI(BaseAI):
             maps.append(copy_2)
             maps.append(copy_4)
         return maps
-
-    # def getWorstMove(self, state):
-    #     rowsThatCanMerge = []
-    #     columnsThatCanMerge = []
-    #     map = state.map
-    #     transposeMap = np.array(map).T.tolist()
-    #     availableCells = state.getAvailableCells()
-    #
-    #     for i in range(len(state.map)):
-    #         if map[i].count(2) > 2:
-    #             rowsThatCanMerge.append((2, i))
-    #         elif map[i].count(4) > 2:
-    #             rowsThatCanMerge.append((4, i))
-    #
-    #         if transposeMap[i].count(2) > 2:
-    #             columnsThatCanMerge.append((2, i))
-    #         elif transposeMap[i].count(4) > 2:
-    #             columnsThatCanMerge.append((4, i))
-    #
-    #
-    #     # cells = state.getAvailableCells()
-    #     # for cell in cells:
-    #     #     # Get all values in row and column
-    #     #     rowVector = []
-    #     #     colVector = []
-    #     #     # if a 2 or 4 is found remove from list...?
-    #     #     pass
-    #     pass
-    #
-    # def resolveBadCell(self, cell, rows, cols):
-    #     pass
