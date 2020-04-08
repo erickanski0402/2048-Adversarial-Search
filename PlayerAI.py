@@ -4,10 +4,6 @@ from random import randint, random
 from math import inf, sqrt
 import numpy as np
 
-UP = 0
-DOWN = 1
-LEFT = 2
-RIGHT = 3
 MAX_HEIGHT = 4
 
 class PlayerAI(BaseAI):
@@ -17,7 +13,6 @@ class PlayerAI(BaseAI):
 
     def getMove(self, gridCopy):
         self.maxTile = gridCopy.getMaxTile()
-        # root = GridNode(None, None, gridCopy, 0)
         return self.getDirectionFromParent(
             self.decision(GridNode(None, None, gridCopy, 0))
         )
@@ -25,10 +20,6 @@ class PlayerAI(BaseAI):
     def getDirectionFromParent(self, node):
         return (node.dirFromParent if node.parent.parent is None
                 else self.getDirectionFromParent(node.parent))
-        # if node.parent.parent is None:
-        #     return node.dirFromParent
-        # else:
-        #     return self.getDirectionFromParent(node.parent)
 
     def minimize(self, state, alpha, beta):
         if self.terminalTest(state):
