@@ -10,41 +10,27 @@ LEFT = 2
 RIGHT = 3
 MAX_HEIGHT = 4
 
-##################################DELETE ME#####################################
-################################################################################
-def winDisplay(grid):
-    for i in range(grid.size):
-        for j in range(grid.size):
-            print("%6d  " % grid.map[i][j], end="")
-        print("")
-    print("")
-################################################################################
-################################################################################
-
 class PlayerAI(BaseAI):
     def __init__(self):
         self.maxTile = 0
         pass
 
     def getMove(self, gridCopy):
-        root = GridNode(None, None, gridCopy, 0)
         self.maxTile = gridCopy.getMaxTile()
-        best = self.decision(root)
-        # print('BEST', best)
-        dir = self.getDirectionFromParent(best)
-        return dir
-
-        # moves = sorted(gridCopy.getAvailableMoves(), key = lambda x: random())
-        # return moves[randint(0, len(moves ) - 1)] if moves else None
+        # root = GridNode(None, None, gridCopy, 0)
+        return self.getDirectionFromParent(
+            self.decision(GridNode(None, None, gridCopy, 0))
+        )
 
     def getDirectionFromParent(self, node):
-        if node.parent.parent is None:
-            return node.dirFromParent
-        else:
-            return self.getDirectionFromParent(node.parent)
+        return (node.dirFromParent if node.parent.parent is None
+                else self.getDirectionFromParent(node.parent))
+        # if node.parent.parent is None:
+        #     return node.dirFromParent
+        # else:
+        #     return self.getDirectionFromParent(node.parent)
 
     def minimize(self, state, alpha, beta):
-        # print('MINIMIZE STATE', state.dirFromParent)
         if self.terminalTest(state):
             return (None, self.eval(state))
 
@@ -62,20 +48,10 @@ class PlayerAI(BaseAI):
 
             if minUtility <= beta:
                 beta = minUtility
-        # cells = all possible next grids that:
-        #   - Don't increase utility
-        #
-        # for <child> (grid object) in <calculated minimizing cells> (List of grid objects):
-        #   (_, utility) = Maximize(child)
-        #
-        #   if utility < minUtility:
-        #       (minChild, minUtility) = (child, utility)
-        #
-        # print('MIN CHILD ', minChild)
+
         return (minChild, minUtility)
 
     def maximize(self, state, alpha, beta):
-        # print('MAXIMIZE STATE', state.dirFromParent)
         if self.terminalTest(state):
             return (None, self.eval(state))
 
@@ -93,28 +69,17 @@ class PlayerAI(BaseAI):
             if utility > alpha:
                 alpha = maxUtility
 
-        # moves = calculate grids possible given all legal moves
-        # for <move> (grid object) in <all legal moves> (list of grid objects):
-        #   (_, utility) = Minimize(move)
-        #
-        #   if utility > maxUtility:
-        #       (maxChild, maxChild) = (child, utility)
-
-        # print('MAX CHILD ', maxChild)
         return (maxChild, maxUtility)
 
     def decision(self, root):
-        # print('ROOT', root)
         (child, _) = self.maximize(root, -inf, inf)
-        # print('CHILD', child)
         return child
 
     def terminalTest(self, node):
-        # print('terminal test', state)
         state = node.grid
-        if ((self.checkHeight(node))
-        or (self.checkForAvailableMoves(state))
-        or (self.checkForNewMaxTile(state))):
+        if (self.checkHeight(node)
+        or self.checkForAvailableMoves(state)
+        or self.checkForNewMaxTile(state)):
         # or (self.closeToGoodMerge(state))):
             return True
         # return a test of the following values:
@@ -133,21 +98,20 @@ class PlayerAI(BaseAI):
     def checkForNewMaxTile(self, state):
         return state.getMaxTile() > self.maxTile
 
-    def closeToGoodMerge(self, state):
-        # - find the max tile
-        # - check the row/col the max tile is on
-        # - if there is another tile of that value in the row and/or col
-        # - return true, else false
-        maxTile = state.getMaxTile()
-        map = state.map
-        map_t = np.array(map).T.tolist()
-
-        for i in range(len(map)):
-            # print(map)
-            if ((map[i].count(maxTile) > 1)
-            or (map_t[i].count(maxTile) > 1)):
-                return True
-        return False
+    # def closeToGoodMerge(self, state):
+    #     # - find the max tile
+    #     # - check the row/col the max tile is on
+    #     # - if there is another tile of that value in the row and/or col
+    #     # - return true, else false
+    #     maxTile = state.getMaxTile()
+    #     map = state.map
+    #     map_t = np.array(map).T.tolist()
+    #
+    #     for i in range(len(map)):
+    #         if ((map[i].count(maxTile) > 1)
+    #         or (map_t[i].count(maxTile) > 1)):
+    #             return True
+    #     return False
 
     def eval(self, node):
         # Ideas for utility function:
@@ -182,30 +146,29 @@ class PlayerAI(BaseAI):
         # for each value in the grid, check the surrounding values (up, down, left, right)
         #   if the same value is found there add to the score weighted by the value of the cell
         score = 0
-        map = state.map
         return score
 
-    def generatePlayerMaps(self, state):
-        moves = state.getAvailableMoves()
-        maps = []
-
-        for dir in moves:
-            copy = state.clone()
-            copy.move(dir)
-            maps.append(copy)
-        return maps
-
-    def generateAversaryMaps(self, state):
-        cells = state.getAvailableCells()
-        maps = []
-
-        for cell in cells:
-            copy_2 = state.clone()
-            copy_4 = state.clone()
-
-            copy_2.map[cell[0]][cell[1]] = 2
-            copy_4.map[cell[0]][cell[1]] = 4
-
-            maps.append(copy_2)
-            maps.append(copy_4)
-        return maps
+    # def generatePlayerMaps(self, state):
+    #     moves = state.getAvailableMoves()
+    #     maps = []
+    #
+    #     for dir in moves:
+    #         copy = state.clone()
+    #         copy.move(dir)
+    #         maps.append(copy)
+    #     return maps
+    #
+    # def generateAversaryMaps(self, state):
+    #     cells = state.getAvailableCells()
+    #     maps = []
+    #
+    #     for cell in cells:
+    #         copy_2 = state.clone()
+    #         copy_4 = state.clone()
+    #
+    #         copy_2.map[cell[0]][cell[1]] = 2
+    #         copy_4.map[cell[0]][cell[1]] = 4
+    #
+    #         maps.append(copy_2)
+    #         maps.append(copy_4)
+    #     return maps

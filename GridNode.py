@@ -10,15 +10,11 @@ class GridNode:
         return self.height
 
     def resolveChildren(self, max):
-        children = []
-        if max:
-            for dir, grid in self.generatePlayerMaps():
-                children.append(GridNode(self, dir, grid, self.height + 1))
-        else:
-            for grid in self.generateAversaryMaps():
-                children.append(GridNode(self, "-", grid, self.height + 1))
+        generator = self.generatePlayerMaps if max else self.generateAversaryMaps
+        return [self.createGridNode(grid, dir) for grid, dir in generator()]
 
-        return children
+    def createGridNode(self, grid, dir):
+        return GridNode(self, dir, grid, self.height + 1)
 
     def generatePlayerMaps(self):
         state = self.grid
@@ -28,7 +24,7 @@ class GridNode:
         for dir in moves:
             copy = state.clone()
             copy.move(dir)
-            maps.append((dir, copy))
+            maps.append((copy, dir))
         return maps
 
     def generateAversaryMaps(self):
@@ -43,6 +39,6 @@ class GridNode:
             copy_2.map[cell[0]][cell[1]] = 2
             copy_4.map[cell[0]][cell[1]] = 4
 
-            maps.append(copy_2)
-            maps.append(copy_4)
+            maps.append((copy_2, '-'))
+            maps.append((copy_4, '-'))
         return maps
