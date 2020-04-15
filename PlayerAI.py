@@ -1,7 +1,7 @@
 from BaseAI import BaseAI
 from GridNode import GridNode
 from random import randint, random
-from math import inf, sqrt
+from math import inf, sqrt, log
 import numpy as np
 
 MAX_HEIGHT = 4
@@ -120,9 +120,14 @@ class PlayerAI(BaseAI):
         #
         # How to insentivise the algorithm to focus on more tiles of higher values
         state = node.grid
-        return (self.calculateRawScore(state)
-        + self.calculateCellScore(state)
-        + self.calculateSubCellScore(state))
+        return (
+                # self.calculateRawScore(state) +
+                # self.calculateCellScore(state) * sqrt(state.getMaxTile()) +
+                # self.calculateSubCellScore(state) +
+                self.calculateWeightedRowScores(state) +
+                # self.highestTileInCorner(state) +
+                0
+        )
 
     def calculateRawScore(self, state):
         # Calculates the raw score of the given state
@@ -131,13 +136,38 @@ class PlayerAI(BaseAI):
         # return sum([sum(row) for row in state.map])
 
     def calculateCellScore(self, state):
-        return len(state.getAvailableCells()) * sqrt(state.getMaxTile())
+        return len(state.getAvailableCells())
 
     def calculateSubCellScore(self, state):
         # for each value in the grid, check the surrounding values (up, down, left, right)
         #   if the same value is found there add to the score weighted by the value of the cell
         score = 0
         return score
+
+    def calculateWeightedRowScores(self, state):
+        grid = state.map
+        length = len(grid)
+        # return sum([
+        #     sum([grid[0][i] ** resolveExponent(i, 0, length) for i in range(length)]),
+        #     sum([grid[1][i] ** resolveExponent(i, 1, length) for i in range(length)]),
+        #     sum([grid[2][i] ** resolveExponent(i, 2, length) for i in range(length)]),
+        #     sum([grid[3][i] ** resolveExponent(i, 3, length) for i in range(length)])
+        # ])
+        return sum([
+            sum([grid[0][0] ** 0, grid[0][1] ** 0, grid[0][2] ** 0, grid[0][3] ** 1]),
+            sum([grid[1][0] ** 0, grid[1][1] ** 0, grid[1][2] ** 1, grid[1][3] ** 2]),
+            sum([grid[2][0] ** 0, grid[2][1] ** 1, grid[2][2] ** 2, grid[2][3] ** 3]),
+            sum([grid[3][0] ** 1, grid[3][1] ** 2, grid[3][2] ** 3, grid[3][3] ** 4])
+        ])
+        # return sum([grid[3][0], grid[3][1] ** 2, grid[3][2] ** 3, grid[3][3] ** 4])
+
+    def highestTileInCorner(self, state):
+        grid = state.map
+        maxTile = self.maxTile
+        return maxTile if grid[3][3] is maxTile else 0
+
+    def resolveExponent(self, i, row):
+        return i if ((i + row) - length) >= 0 else 0
 
     # def generatePlayerMaps(self, state):
     #     moves = state.getAvailableMoves()
